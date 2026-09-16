@@ -1,0 +1,17 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>모아 — 학습자료 만들기</title><link rel="stylesheet" href="panel.css"></head><body>
+<header><div class="wordmark">모아<span>STUDY CAPTURE</span></div><span class="local">내 PC에 저장</span></header>
+<main><h1>읽던 화면을,<br>나만의 학습자료로.</h1><p class="intro">필요한 부분만 모아 한 권의 PDF로 만드세요.</p>
+<button id="new" class="primary">＋ 학습자료 만들기</button>
+<section class="setup"><label for="title">자료 이름</label><input id="title" value="나의 학습자료" maxlength="100">
+<div class="step"><span class="stepno">1</span><div><h2>캡처 구역</h2><p id="captureInfo">저장할 화면 영역을 지정하세요.</p></div><button id="capture">영역 지정</button></div>
+<div class="step"><span class="stepno">2</span><div><h2>마우스 좌클릭 위치</h2><p id="clickInfo">다음 페이지 버튼 등을 한 번 클릭하세요.</p></div><button id="click">위치 지정</button></div>
+<label class="check"><input type="checkbox" id="zoom" checked> 영역 지정 시 확대경 사용 (Z로 전환)</label>
+<label class="check"><input type="checkbox" id="auto"> 자동 클릭 사용</label>
+<div class="settings"><label>클릭 간격<select id="interval"><option value="1000">1초에 한 번</option><option value="2000" selected>2초에 한 번</option><option value="3000">3초에 한 번</option><option value="5000">5초에 한 번</option><option value="10000">10초에 한 번</option></select></label><label>변경 감지<select id="threshold"><option value="0.01">민감 · 1%</option><option value="0.03" selected>보통 · 3%</option><option value="0.08">둔감 · 8%</option></select></label></div>
+<p class="hint">화면이 안정되면 캡처합니다. 빠른 전환에서 누락을 줄이도록 자동 클릭 간격이 늘어날 수 있습니다.</p>
+<div class="actions"><button id="start" class="primary">캡처 시작</button><button id="stop" disabled>중지</button></div>
+</section>
+<p id="status" role="status" aria-live="polite">학습자료 만들기를 눌러 시작하세요.</p>
+<section class="collection"><div class="collectionHead"><h2>모은 페이지 <span id="count">0</span></h2><button id="export" disabled>PDF 저장 ↓</button></div><div id="pages"><div class="empty">아직 모은 페이지가 없습니다.<br><span>첫 화면부터 순서대로 여기에 쌓입니다.</span></div></div></section>
+<footer>작업 중에는 이 패널과 대상 탭을 열어두세요.<br>탭 이동·새로고침·화면 크기 변경 시 자동 중지됩니다.</footer></main>
+<script src="vendor/jspdf.umd.min.js"></script><script type="module" src="panel.js"></script></body></html>

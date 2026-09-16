@@ -1,0 +1,67 @@
+import {chromium} from 'playwright';
+import {createServer} from 'node:http';
+import {readFile,mkdir} from 'node:fs/promises';
+import {resolve,extname} from 'node:path';
+import assert from 'node:assert/strict';
+const root=resolve('.');await mkdir('test-results',{recursive:true});
+const server=createServer(async(req,res)=>{try{const path=resolve(root,'.'+decodeURIComponent(req.url.split('?')[0]));if(!path.startsWith(root+'/'))throw Error();res.setHeader('Content-Type',({'.js':'text/javascript','.css':'text/css','.html':'text/html'})[extname(path)]||'application/octet-stream');res.end(await readFile(path));}catch{res.statusCode=404;res.end();}}).listen(0,'127.0.0.1');
+await new Promise(r=>server.once('listening',r));const base=`http://127.0.0.1:${server.address().port}`;
+const browser=await chromium.launch({headless:true});
+try{
+ const context=await browser.newContext({viewport:{width:1100,height:800},deviceScaleFactor:2});
+ const target=await context.newPage();await target.goto(base+'/tests/demo.html');
+ await target.evaluate(()=>{window.chrome={runtime:{onMessage:{addListener:fn=>window.listener=fn}}};});
+ await target.addScriptTag({path:'extension/content.js'});
+ const panel=await context.newPage();await panel.setViewportSize({width:390,height:1050});
+ const errors=[];panel.on('pageerror',e=>errors.push(e.message));
+ let current=true,failCapture=false;
+ let lastMarkers;
+ await panel.exposeFunction('mockSend',async message=>{if(message.type==='markers')lastMarkers=message;return target.evaluate(m=>new Promise(resolve=>window.listener(m,{},resolve)),message);});
+ await panel.exposeFunction('mockCapture',async()=>{assert.equal(await target.locator('[data-study-markers]').evaluate(el=>getComputedStyle(el).visibility),'hidden');if(failCapture){failCapture=false;throw Error('test capture failure');}return `data:image/png;base64,${(await target.screenshot()).toString('base64')}`;});
+ await panel.exposeFunction('mockTab',()=>({id:current?1:2,windowId:1,url:base+'/tests/demo.html'}));
+ await panel.addInitScript(()=>{
+ const evt={addListener:()=>{}};
+ window.chrome={tabs:{query:async()=>[await window.mockTab()],sendMessage:(_,m)=>window.mockSend(m),captureVisibleTab:()=>window.mockCapture(),onActivated:evt,onUpdated:evt,onRemoved:evt},scripting:{executeScript:async()=>{}},storage:{local:{get:async()=>JSON.parse(localStorage.getItem('settings')||'{}'),set:async v=>localStorage.setItem('settings',JSON.stringify(v))}}};
+ });
+ await panel.goto(base+'/extension/panel.html');await panel.getByRole('button',{name:'＋ 학습자료 만들기'}).click();
+ await panel.locator('#capture').click();await target.locator('[data-study-selection]').waitFor();
+ await target.mouse.move(110,170);await target.screenshot({path:'test-results/magnifier.png'});await target.mouse.move(50,50);await target.mouse.down();await target.mouse.move(800,490,{steps:10});await target.mouse.up();await target.keyboard.press('Enter');
+ await panel.waitForFunction(()=>document.querySelector('#captureInfo').textContent.includes('선택됨'));
+ await panel.locator('#capture').click();await target.locator('[data-study-selection]').waitFor();await target.keyboard.press('Escape');
+ await panel.waitForFunction(()=>document.querySelector('#status').textContent.includes('새로 지정'));
+ assert.equal(await panel.locator('#capture').textContent(),'영역 지정');
+ await panel.locator('#capture').click();await target.locator('[data-study-selection]').waitFor();
+ await target.mouse.move(50,50);await target.mouse.down();await target.mouse.move(800,490);await target.mouse.up();
+ await target.keyboard.press('ArrowRight');await target.keyboard.press('ArrowDown');
+ await target.keyboard.press('z');await target.keyboard.press('Enter');
+ await panel.waitForFunction(()=>document.querySelector('#capture').textContent==='재지정');
+ assert.equal(await panel.locator('#zoom').isChecked(),false);
+ assert.deepEqual(lastMarkers.capture,{x:51,y:51,width:750,height:440});
+ const markerReply=await target.evaluate(()=>new Promise(resolve=>window.listener({type:'geometry'}, {},resolve)));
+ assert.ok(markerReply.width>0);
+ await panel.locator('#click').click();await target.locator('[data-study-selection]').waitFor();
+ await target.mouse.click(150,580);
+ assert.equal(await target.locator('#number').textContent(),'01 / 03','point selection must not click through');
+ await panel.waitForFunction(()=>document.querySelector('#clickInfo').textContent.includes('위치'));
+ assert.equal(await target.locator('[data-study-markers]').evaluate(el=>getComputedStyle(el).visibility),'visible');
+ await target.screenshot({path:'test-results/markers.png'});
+ await panel.locator('#start').click();
+ try { await panel.waitForFunction(()=>document.querySelector('#count').textContent==='3',{},{timeout:15000}); } catch(e) { console.log(await panel.locator('#status').textContent(), await panel.locator('#count').textContent(), await target.locator('#next').boundingBox(), await target.locator('#number').textContent(), await panel.evaluate(async()=>{const r=await indexedDB.databases();return r;})); await panel.screenshot({path:'test-results/failure.png',fullPage:true}); throw e; }
+ await panel.locator('#stop').click();await panel.locator('#export').waitFor({state:'visible'});
+ await panel.waitForFunction(()=>!document.querySelector('#export').disabled);
+ assert.equal(await target.locator('#number').textContent(),'03 / 03');
+ failCapture=true;await panel.locator('#capture').click();
+ await panel.waitForFunction(()=>document.querySelector('#status').textContent.includes('test capture failure'));
+ assert.equal(await target.locator('[data-study-markers]').evaluate(el=>getComputedStyle(el).visibility),'visible','markers restored on screenshot failure');
+ await panel.screenshot({path:'test-results/panel.png',fullPage:true});
+ const downloadPromise=panel.waitForEvent('download');await panel.locator('#export').click();const download=await downloadPromise;await download.saveAs('test-results/study-capture.pdf');
+ await panel.reload();await panel.waitForFunction(()=>document.querySelector('#count').textContent==='3');
+ await panel.getByRole('button',{name:'2번째 페이지 삭제'}).click();await panel.waitForFunction(()=>document.querySelector('#count').textContent==='2');
+ // Re-select after reload and check active-tab protection.
+ await panel.locator('#capture').click();await target.locator('[data-study-selection]').waitFor();await target.mouse.move(50,50);await target.mouse.down();await target.mouse.move(800,490);await target.mouse.up();await target.keyboard.press('Enter');
+ await panel.waitForFunction(()=>!document.querySelector('#start').disabled);current=false;await panel.locator('#start').click();
+ await panel.waitForFunction(()=>document.querySelector('#status').textContent.includes('대상 탭을 벗어나'));
+ assert.equal(await panel.locator('#count').textContent(),'2');
+ assert.deepEqual(errors,[]);
+ console.log('PASS: region selection, 3 stable captures, automatic next clicks, PDF download, IndexedDB restore, delete, active-tab guard; no browser errors. Chrome APIs are mocked, page interactions and screenshots are real.');
+}finally{await browser.close();server.close();}
