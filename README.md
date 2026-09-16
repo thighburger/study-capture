@@ -28,6 +28,8 @@
 5. 1단계에서 압축해제된 폴더를 선택합니다.
 6. 목록에 **모아 — 학습자료 캡처** 카드가 나타나고, 카드의 사용 스위치가 켜져 있으면 설치 완료입니다.
 
+![개발자 모드와 압축해제된 확장 프로그램 로드 버튼, 모아 설치 완료 화면](docs/images/chrome-extension-installed.png)
+
 **그냥 폴더 드래그앤드롭해도 돼요**
 
 ## 3. 모아 아이콘 고정하기
@@ -42,5 +44,9 @@
 이제 주소창 옆에서 모아 아이콘을 바로 누를 수 있습니다. 고정하지 않았어도 퍼즐 메뉴에서 모아를 누르면 열립니다.
 
 # 시연 영상
+
+아래 영상의 재생 버튼을 누르면 바로 볼 수 있습니다.
+
+https://github.com/user-attachments/assets/876dfb64-4db0-4e7e-b962-71506b8a80b6
 
 [시연 영상 보기·다운로드 (.mov)](https://github.com/thighburger/study-capture/releases/download/v1.2.1/study-capture-demo.mov)
