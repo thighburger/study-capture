@@ -25,18 +25,20 @@ try{
  });
  await panel.goto(base+'/extension/panel.html');await panel.getByRole('button',{name:'＋ 학습자료 만들기'}).click();
  await panel.locator('#capture').click();await target.locator('[data-study-selection]').waitFor();
- await target.mouse.move(110,170);await target.screenshot({path:'test-results/magnifier.png'});await target.mouse.move(50,50);await target.mouse.down();await target.mouse.move(800,490,{steps:10});await target.mouse.up();await target.keyboard.press('Enter');
+ await target.mouse.move(110,170);await target.screenshot({path:'test-results/magnifier.png'});await target.mouse.move(50,50);await target.mouse.down();await target.mouse.move(800,490,{steps:10});await target.mouse.up();
  await panel.waitForFunction(()=>document.querySelector('#captureInfo').textContent.includes('선택됨'));
  await panel.locator('#capture').click();await target.locator('[data-study-selection]').waitFor();await target.keyboard.press('Escape');
  await panel.waitForFunction(()=>document.querySelector('#status').textContent.includes('새로 지정'));
  assert.equal(await panel.locator('#capture').textContent(),'영역 지정');
  await panel.locator('#capture').click();await target.locator('[data-study-selection]').waitFor();
- await target.mouse.move(50,50);await target.mouse.down();await target.mouse.move(800,490);await target.mouse.up();
+ await target.mouse.move(50,50);await target.mouse.down();await target.mouse.move(800,490);
  await target.keyboard.press('ArrowRight');await target.keyboard.press('ArrowDown');
  await target.keyboard.press('z');await target.keyboard.press('Enter');
+ assert.equal(await target.locator('[data-study-selection]').count(),1,'Enter must not confirm');
+ await target.mouse.up();
  await panel.waitForFunction(()=>document.querySelector('#capture').textContent==='재지정');
- assert.equal(await panel.locator('#zoom').isChecked(),false);
- assert.deepEqual(lastMarkers.capture,{x:51,y:51,width:750,height:440});
+ assert.equal(await panel.locator('#zoom').isChecked(),true);
+ assert.deepEqual(lastMarkers.capture,{x:50,y:50,width:751,height:441});
  const markerReply=await target.evaluate(()=>new Promise(resolve=>window.listener({type:'geometry'}, {},resolve)));
  assert.ok(markerReply.width>0);
  await panel.locator('#click').click();await target.locator('[data-study-selection]').waitFor();
@@ -58,7 +60,7 @@ try{
  await panel.reload();await panel.waitForFunction(()=>document.querySelector('#count').textContent==='3');
  await panel.getByRole('button',{name:'2번째 페이지 삭제'}).click();await panel.waitForFunction(()=>document.querySelector('#count').textContent==='2');
  // Re-select after reload and check active-tab protection.
- await panel.locator('#capture').click();await target.locator('[data-study-selection]').waitFor();await target.mouse.move(50,50);await target.mouse.down();await target.mouse.move(800,490);await target.mouse.up();await target.keyboard.press('Enter');
+ await panel.locator('#capture').click();await target.locator('[data-study-selection]').waitFor();await target.mouse.move(50,50);await target.mouse.down();await target.mouse.move(800,490);await target.mouse.up();
  await panel.waitForFunction(()=>!document.querySelector('#start').disabled);current=false;await panel.locator('#start').click();
  await panel.waitForFunction(()=>document.querySelector('#status').textContent.includes('대상 탭을 벗어나'));
  assert.equal(await panel.locator('#count').textContent(),'2');

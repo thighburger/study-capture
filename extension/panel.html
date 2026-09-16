@@ -5,10 +5,10 @@
 <section class="setup"><label for="title">자료 이름</label><input id="title" value="나의 학습자료" maxlength="100">
 <div class="step"><span class="stepno">1</span><div><h2>캡처 구역</h2><p id="captureInfo">저장할 화면 영역을 지정하세요.</p></div><button id="capture">영역 지정</button></div>
 <div class="step"><span class="stepno">2</span><div><h2>마우스 좌클릭 위치</h2><p id="clickInfo">다음 페이지 버튼 등을 한 번 클릭하세요.</p></div><button id="click">위치 지정</button></div>
-<label class="check"><input type="checkbox" id="zoom" checked> 영역 지정 시 확대경 사용 (Z로 전환)</label>
+<label class="check"><input type="checkbox" id="zoom" checked> 영역 지정 시 확대경 사용</label>
 <label class="check"><input type="checkbox" id="auto"> 자동 클릭 사용</label>
 <div class="settings"><label>클릭 간격<select id="interval"><option value="1000">1초에 한 번</option><option value="2000" selected>2초에 한 번</option><option value="3000">3초에 한 번</option><option value="5000">5초에 한 번</option><option value="10000">10초에 한 번</option></select></label><label>변경 감지<select id="threshold"><option value="0.01">민감 · 1%</option><option value="0.03" selected>보통 · 3%</option><option value="0.08">둔감 · 8%</option></select></label></div>
-<p class="hint">화면이 안정되면 캡처합니다. 빠른 전환에서 누락을 줄이도록 자동 클릭 간격이 늘어날 수 있습니다.</p>
+<p class="hint">주의: 클릭 간격이 너무 짧으면 캡처가 누락될 수 있습니다. 누락되면 간격을 3~5초로 늘려주세요. 화면이 안정될 때까지 실제 클릭 간격이 늘어날 수 있습니다.</p>
 <div class="actions"><button id="start" class="primary">캡처 시작</button><button id="stop" disabled>중지</button></div>
 </section>
 <p id="status" role="status" aria-live="polite">학습자료 만들기를 눌러 시작하세요.</p>

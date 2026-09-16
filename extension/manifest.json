@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "모아 — 학습자료 캡처",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "웹페이지의 선택 영역을 변경 감지로 캡처하고, 순서대로 PDF 학습자료를 만듭니다.",
   "minimum_chrome_version": "116",
   "permissions": [

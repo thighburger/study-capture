@@ -61,7 +61,7 @@ async function select(kind){
   if(geometry&&!sameGeometry(geometry,before)){capture=null;click=null;geometry=null;await syncMarkers();updateRegions();}
   if(kind==='capture')capture=null;else click=null;
   await syncMarkers();updateRegions();
-  status(kind==='capture'?'드래그 후 방향키로 영역을 1px씩 이동하고 Enter로 확정하세요. Z: 확대경, Esc: 취소.':'웹페이지에서 자동 클릭할 위치를 한 번 클릭하세요. Esc로 취소합니다.');
+  status(kind==='capture'?'방향키로 선택 커서를 1px씩 조정할 수 있습니다. 드래그를 놓으면 확정됩니다. Esc: 취소.':'웹페이지에서 자동 클릭할 위치를 한 번 클릭하세요. Esc로 취소합니다.');
   const snapshot=kind==='capture'?await cleanScreenshot():undefined;
   const r=await chrome.tabs.sendMessage(target.id,{type:'select',kind,snapshot,zoom:$('zoom').checked});
   $('zoom').checked=r.zoom!==false;await chrome.storage.local.set({zoom:$('zoom').checked});
